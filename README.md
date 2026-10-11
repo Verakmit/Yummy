@@ -10,6 +10,7 @@ Hecho con Laravel 13, Livewire 4, Bootstrap 5.3 (Sass), Vite y MariaDB.
 - **Ficha** de cada receta con ingredientes, cantidades, pasos y etiquetas.
 - **Búsqueda** por texto en título y descripción, mientras se escribe.
 - **Filtros** combinables por categoría, ingrediente, dificultad, tiempo máximo y etiquetas. Quedan reflejados en la URL, así que una búsqueda se puede compartir con un enlace.
+- **Lista de la compra** de una receta, con las cantidades recalculadas para el número de comensales que se indique. No se guarda: se puede marcar, copiar o imprimir.
 - **Crear, editar y borrar** recetas, con filas de ingredientes y pasos que se añaden, quitan y reordenan, y foto opcional.
 
 > **Aviso:** la aplicación no tiene inicio de sesión. Cualquiera que pueda abrirla puede crear, editar y borrar recetas. Está pensada para uso local; antes de publicarla en internet hay que proteger esas pantallas.
@@ -95,6 +96,7 @@ No hay controladores: cada página es un componente Livewire de un solo archivo 
 | `/nueva-receta` | Formulario de alta |
 | `/recetas/{slug}` | Ficha de la receta |
 | `/recetas/{slug}/editar` | Formulario de edición |
+| `/recetas/{slug}/lista-de-la-compra` | Lista de la compra |
 
 Los modelos están en `app/Models`: una receta pertenece a una categoría, tiene pasos ordenados y se relaciona con etiquetas e ingredientes. Los ingredientes forman un catálogo compartido entre recetas.
 

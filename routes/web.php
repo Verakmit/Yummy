@@ -6,3 +6,4 @@ Route::livewire('/', 'pages::home')->name('home');
 Route::livewire('/nueva-receta', 'pages::recipes.form')->name('recipes.create');
 Route::livewire('/recetas/{recipe}', 'pages::recipes.show')->name('recipes.show');
 Route::livewire('/recetas/{recipe}/editar', 'pages::recipes.form')->name('recipes.edit');
+Route::livewire('/recetas/{recipe}/lista-de-la-compra', 'pages::recipes.shopping-list')->name('recipes.shopping-list');

@@ -51,7 +51,8 @@ new class extends Component
 
             <h1 class="mb-3">{{ $recipe->title }}</h1>
 
-            <div class="d-flex gap-2 mb-3">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a href="{{ route('recipes.shopping-list', $recipe) }}" class="btn btn-sm btn-primary" wire:navigate>Lista de la compra</a>
                 <a href="{{ route('recipes.edit', $recipe) }}" class="btn btn-sm btn-outline-secondary" wire:navigate>Editar</a>
                 <button type="button" class="btn btn-sm btn-outline-danger" wire:click="delete"
                     wire:confirm="¿Borrar «{{ $recipe->title }}»? Esta acción no se puede deshacer.">Borrar</button>

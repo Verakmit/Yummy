@@ -11,7 +11,7 @@
         @livewireStyles
     </head>
     <body class="bg-body-tertiary">
-        <nav class="navbar navbar-expand-md bg-body border-bottom">
+        <nav class="navbar navbar-expand-md bg-body border-bottom d-print-none">
             <div class="container">
                 <a class="navbar-brand fw-semibold" href="{{ url('/') }}" wire:navigate>{{ config('app.name') }}</a>
 

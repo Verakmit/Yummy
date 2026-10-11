@@ -43,6 +43,7 @@ There are no controllers. Each route in `routes/web.php` is `Route::livewire(...
 | `/nueva-receta` | `pages::recipes.form` | `pages/recipes/⚡form.blade.php` |
 | `/recetas/{recipe}` | `pages::recipes.show` | `pages/recipes/⚡show.blade.php` |
 | `/recetas/{recipe}/editar` | `pages::recipes.form` | same form component |
+| `/recetas/{recipe}/lista-de-la-compra` | `pages::recipes.shopping-list` | `pages/recipes/⚡shopping-list.blade.php` |
 
 All of them render inside `resources/views/layouts/app.blade.php`, which also shows the `status` session flash. `Recipe` binds by `slug`. The create route is `/nueva-receta` rather than `/recetas/nueva` so it can never collide with a recipe slug.
 
@@ -64,6 +65,10 @@ The form component serves both create and edit. On the create route the containe
 All filtering lives in the `recipes` computed property of `pages/⚡home.blade.php`; every filter is a `#[Url]` property with a Spanish query-string alias (`q`, `categoria`, `ingrediente`, `dificultad`, `tiempo`, `etiquetas`). Selected tags are combined with AND.
 
 Text search is the `search` scope on `Recipe`. It runs a boolean-mode FULLTEXT query over `title` and `description`, turning each word into a required prefix term (`+word*`). The index ignores tokens shorter than three characters, so those are dropped, and a term made only of short words falls back to a `LIKE` on the title.
+
+### Shopping list
+
+The shopping list is computed on the fly and never stored. `App\Support\ShoppingList::for($recipe, $diners)` scales each quantity by `diners / servings`, adds up lines that share ingredient and unit, and rounds amounts of 10 or more to whole numbers. The page keeps the number of diners in the `comensales` query parameter; the ticked-off state of each line is client-side Alpine state only.
 
 ### Tests
 
