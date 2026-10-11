@@ -1,0 +1,12 @@
+@import 'bootstrap/scss/bootstrap';
+
+.recipe-card-image {
+    height: 11rem;
+    object-fit: cover;
+}
+
+.recipe-form-photo {
+    max-width: 16rem;
+    max-height: 12rem;
+    object-fit: cover;
+}
