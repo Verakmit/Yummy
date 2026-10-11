@@ -43,7 +43,7 @@ There are no controllers. Each route in `routes/web.php` is `Route::livewire(...
 | `/nueva-receta` | `pages::recipes.form` | `pages/recipes/⚡form.blade.php` |
 | `/recetas/{recipe}` | `pages::recipes.show` | `pages/recipes/⚡show.blade.php` |
 | `/recetas/{recipe}/editar` | `pages::recipes.form` | same form component |
-| `/recetas/{recipe}/lista-de-la-compra` | `pages::recipes.shopping-list` | `pages/recipes/⚡shopping-list.blade.php` |
+| `/lista-de-la-compra` | `pages::shopping-list` | `pages/⚡shopping-list.blade.php` |
 
 All of them render inside `resources/views/layouts/app.blade.php`, which also shows the `status` session flash. `Recipe` binds by `slug`. The create route is `/nueva-receta` rather than `/recetas/nueva` so it can never collide with a recipe slug.
 
@@ -68,7 +68,12 @@ Text search is the `search` scope on `Recipe`. It runs a boolean-mode FULLTEXT q
 
 ### Shopping list
 
-The shopping list is computed on the fly and never stored. `App\Support\ShoppingList::for($recipe, $diners)` scales each quantity by `diners / servings`, adds up lines that share ingredient and unit, and rounds amounts of 10 or more to whole numbers. The page keeps the number of diners in the `comensales` query parameter; the ticked-off state of each line is client-side Alpine state only.
+The shopping list combines several recipes and is never written to the application's tables.
+
+- `App\Support\ShoppingSelection` holds the picked recipes in the session as `[recipe id => diners]`. Recipes are added or removed from the cards on the home page and from the recipe page; each starts with its own number of servings.
+- `App\Support\ShoppingList::combine()` scales each quantity by `diners / servings`, adds up lines that share ingredient and unit (across recipes too), rounds totals of 10 or more to whole numbers and sorts by name.
+- Anything that changes the selection dispatches `shopping-list-updated`, which the `shopping-list-link` component in the navbar listens to in order to refresh its counter.
+- The ticked-off state of each line is client-side Alpine state only.
 
 ### Tests
 

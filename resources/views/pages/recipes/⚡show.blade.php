@@ -2,6 +2,7 @@
 
 use App\Models\Recipe;
 use App\Support\Quantity;
+use App\Support\ShoppingSelection;
 use Livewire\Component;
 
 new class extends Component
@@ -21,8 +22,21 @@ new class extends Component
         return trim(Quantity::format($quantity).' '.$unit);
     }
 
+    public function inShoppingList(): bool
+    {
+        return ShoppingSelection::has($this->recipe->id);
+    }
+
+    public function toggleShoppingList(): void
+    {
+        ShoppingSelection::toggle($this->recipe);
+
+        $this->dispatch('shopping-list-updated');
+    }
+
     public function delete(): void
     {
+        ShoppingSelection::remove($this->recipe->id);
         $this->recipe->delete();
 
         session()->flash('status', 'Receta borrada.');
@@ -52,7 +66,12 @@ new class extends Component
             <h1 class="mb-3">{{ $recipe->title }}</h1>
 
             <div class="d-flex flex-wrap gap-2 mb-3">
-                <a href="{{ route('recipes.shopping-list', $recipe) }}" class="btn btn-sm btn-primary" wire:navigate>Lista de la compra</a>
+                @if ($this->inShoppingList())
+                    <button type="button" class="btn btn-sm btn-success" wire:click="toggleShoppingList">En la lista de la compra ✓</button>
+                    <a href="{{ route('shopping-list') }}" class="btn btn-sm btn-outline-primary" wire:navigate>Ver la lista</a>
+                @else
+                    <button type="button" class="btn btn-sm btn-primary" wire:click="toggleShoppingList">Añadir a la lista de la compra</button>
+                @endif
                 <a href="{{ route('recipes.edit', $recipe) }}" class="btn btn-sm btn-outline-secondary" wire:navigate>Editar</a>
                 <button type="button" class="btn btn-sm btn-outline-danger" wire:click="delete"
                     wire:confirm="¿Borrar «{{ $recipe->title }}»? Esta acción no se puede deshacer.">Borrar</button>

@@ -4,34 +4,54 @@ namespace App\Support;
 
 use App\Models\Recipe;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ShoppingList
 {
     /**
-     * The recipe's ingredients with their quantities scaled to the given number of diners.
+     * The ingredients needed to cook the given recipes, each for its own number of diners.
      *
-     * Lines for the same ingredient and unit are added together; ingredients without a
-     * quantity ("al gusto") are listed once, unscaled.
+     * Quantities are scaled by diners / servings. Lines that share ingredient and unit are
+     * added together, across recipes too; ingredients without a quantity ("al gusto") are
+     * listed once, unscaled. The result is sorted by ingredient name.
      *
+     * @param  iterable<array{recipe: Recipe, diners: int}>  $entries
      * @return Collection<int, array{key: string, name: string, amount: string}>
      */
-    public static function for(Recipe $recipe, int $diners): Collection
+    public static function combine(iterable $entries): Collection
     {
-        $factor = $diners / max(1, $recipe->servings);
+        $lines = collect();
 
-        return $recipe->ingredients
-            ->groupBy(fn ($ingredient) => $ingredient->id.'-'.mb_strtolower(trim((string) $ingredient->pivot->unit)))
-            ->map(function (Collection $lines, string $key) use ($factor) {
-                $first = $lines->first();
-                $quantities = $lines->pluck('pivot.quantity')->filter(fn ($quantity) => $quantity !== null);
-                $total = $quantities->isEmpty() ? null : self::round($quantities->sum() * $factor);
+        foreach ($entries as $entry) {
+            $factor = $entry['diners'] / max(1, $entry['recipe']->servings);
+
+            foreach ($entry['recipe']->ingredients as $ingredient) {
+                $unit = trim((string) $ingredient->pivot->unit);
+                $quantity = $ingredient->pivot->quantity;
+
+                $lines->push([
+                    'key' => $ingredient->id.'-'.mb_strtolower($unit),
+                    'name' => $ingredient->name,
+                    'unit' => $unit,
+                    'quantity' => $quantity === null ? null : $quantity * $factor,
+                ]);
+            }
+        }
+
+        return $lines
+            ->groupBy('key')
+            ->map(function (Collection $group, string|int $key) {
+                $quantities = $group->pluck('quantity')->filter(fn ($quantity) => $quantity !== null);
+                $total = $quantities->isEmpty() ? null : self::round($quantities->sum());
 
                 return [
-                    'key' => $key,
-                    'name' => $first->name,
-                    'amount' => trim(Quantity::format($total).' '.$first->pivot->unit),
+                    'key' => (string) $key,
+                    'name' => $group->first()['name'],
+                    'amount' => trim(Quantity::format($total).' '.$group->first()['unit']),
                 ];
             })
+            // Str::ascii keeps accented names in place without needing the intl extension
+            ->sortBy(fn (array $item) => Str::lower(Str::ascii($item['name'])))
             ->values();
     }
 

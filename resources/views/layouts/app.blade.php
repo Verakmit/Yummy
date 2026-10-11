@@ -25,6 +25,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/') }}" wire:navigate>Recetas</a>
                         </li>
+                        <livewire:shopping-list-link />
                         <li class="nav-item">
                             <a class="btn btn-primary btn-sm" href="{{ route('recipes.create') }}" wire:navigate>Nueva receta</a>
                         </li>

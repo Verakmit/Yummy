@@ -1,4 +1,4 @@
-@props(['recipe'])
+@props(['recipe', 'inShoppingList' => false])
 
 <div class="card h-100 shadow-sm">
     @if ($recipe->imageUrl())
@@ -18,8 +18,15 @@
             </a>
         </h2>
 
-        <p class="card-text text-body-secondary small mt-auto mb-0">
+        <p class="card-text text-body-secondary small mt-auto mb-3">
             {{ $recipe->totalTimeLabel() }} · {{ $recipe->difficulty->label() }} · {{ $recipe->servings }} {{ $recipe->servings === 1 ? 'ración' : 'raciones' }}
         </p>
+
+        {{-- Sits above the stretched link so it can be clicked on its own --}}
+        <button type="button" wire:click="toggleShoppingList({{ $recipe->id }})"
+            aria-label="{{ $inShoppingList ? 'Quitar' : 'Añadir' }} {{ $recipe->title }} {{ $inShoppingList ? 'de' : 'a' }} la lista de la compra"
+            @class(['btn btn-sm align-self-start position-relative z-2', 'btn-success' => $inShoppingList, 'btn-outline-primary' => ! $inShoppingList])>
+            {{ $inShoppingList ? 'En la lista ✓' : 'Añadir a la lista' }}
+        </button>
     </div>
 </div>

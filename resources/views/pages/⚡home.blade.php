@@ -5,6 +5,7 @@ use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\Tag;
+use App\Support\ShoppingSelection;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -46,6 +47,21 @@ new #[Title('Recetas')] class extends Component
     {
         $this->reset('search', 'category', 'ingredient', 'difficulty', 'maxTime', 'tags');
         $this->resetPage();
+    }
+
+    public function toggleShoppingList(int $recipeId): void
+    {
+        if ($recipe = Recipe::find($recipeId)) {
+            ShoppingSelection::toggle($recipe);
+
+            $this->dispatch('shopping-list-updated');
+        }
+    }
+
+    #[Computed]
+    public function shoppingSelection(): array
+    {
+        return ShoppingSelection::all();
     }
 
     #[Computed]
@@ -198,7 +214,7 @@ new #[Title('Recetas')] class extends Component
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mb-4">
             @foreach ($this->recipes as $recipe)
                 <div class="col" wire:key="recipe-{{ $recipe->id }}">
-                    <x-recipe-card :recipe="$recipe" />
+                    <x-recipe-card :recipe="$recipe" :in-shopping-list="isset($this->shoppingSelection[$recipe->id])" />
                 </div>
             @endforeach
         </div>
