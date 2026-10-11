@@ -1,58 +1,101 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Yummy
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Recetario web para consultar, buscar y publicar recetas de cocina.
 
-## About Laravel
+Hecho con Laravel 13, Livewire 4, Bootstrap 5.3 (Sass), Vite y MariaDB.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Qué hace
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Listado** de recetas en tarjetas, paginado de 12 en 12.
+- **Ficha** de cada receta con ingredientes, cantidades, pasos y etiquetas.
+- **Búsqueda** por texto en título y descripción, mientras se escribe.
+- **Filtros** combinables por categoría, ingrediente, dificultad, tiempo máximo y etiquetas. Quedan reflejados en la URL, así que una búsqueda se puede compartir con un enlace.
+- **Crear, editar y borrar** recetas, con filas de ingredientes y pasos que se añaden, quitan y reordenan, y foto opcional.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+> **Aviso:** la aplicación no tiene inicio de sesión. Cualquiera que pueda abrirla puede crear, editar y borrar recetas. Está pensada para uso local; antes de publicarla en internet hay que proteger esas pantallas.
 
-## Learning Laravel
+## Requisitos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.3 o superior, con las extensiones `pdo_mysql`, `mbstring`, `openssl` y `fileinfo`
+- Composer
+- Node.js y npm
+- MariaDB 10.4 o superior (sirve la que trae XAMPP)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Instalación
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+1. Clona el repositorio y entra en la carpeta:
 
-## Agentic Development
+   ```sh
+   git clone https://github.com/Verakmit/Yummy.git
+   cd Yummy
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+2. Arranca MariaDB y crea las dos bases de datos, la de desarrollo y la de tests:
 
-```bash
-composer require laravel/boost --dev
+   ```sql
+   CREATE DATABASE yummy CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE yummy_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
 
-php artisan boost:install
+3. Instala las dependencias, crea el `.env`, aplica las migraciones y compila los assets:
+
+   ```sh
+   composer setup
+   ```
+
+   El `.env` que se genera se conecta a `127.0.0.1:3306` con el usuario `root` sin contraseña, que es la configuración por defecto de XAMPP. Si la tuya es distinta, edita las variables `DB_*` del `.env` y ejecuta `php artisan migrate`.
+
+4. Carga las recetas de ejemplo y enlaza la carpeta de fotos:
+
+   ```sh
+   php artisan db:seed
+   php artisan storage:link
+   ```
+
+## Uso
+
+Arranca el servidor de la aplicación y el de Vite a la vez:
+
+```sh
+composer dev
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+y abre <http://localhost:8000>.
 
-## Contributing
+También se pueden lanzar por separado, con `php artisan serve` y `npm run dev`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Para volver a dejar la base de datos con las 30 recetas de ejemplo:
 
-## Code of Conduct
+```sh
+php artisan migrate:fresh --seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Tests
 
-## Security Vulnerabilities
+```sh
+php artisan test
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Los tests necesitan MariaDB en marcha y usan la base de datos `yummy_testing`, no SQLite, porque la búsqueda de texto se apoya en un índice FULLTEXT.
 
-## License
+Para lanzar un solo archivo o un solo test:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```sh
+php artisan test tests/Feature/RecipeFormTest.php
+php artisan test --filter=test_search_ignores_accents
+```
+
+## Estructura
+
+No hay controladores: cada página es un componente Livewire de un solo archivo en `resources/views/pages/`, y las rutas de `routes/web.php` apuntan directamente a ellos.
+
+| Ruta | Página |
+|---|---|
+| `/` | Listado con búsqueda y filtros |
+| `/nueva-receta` | Formulario de alta |
+| `/recetas/{slug}` | Ficha de la receta |
+| `/recetas/{slug}/editar` | Formulario de edición |
+
+Los modelos están en `app/Models`: una receta pertenece a una categoría, tiene pasos ordenados y se relaciona con etiquetas e ingredientes. Los ingredientes forman un catálogo compartido entre recetas.
+
+En `CLAUDE.md` hay una descripción más detallada de la arquitectura.
